@@ -42,21 +42,21 @@ resource "azurerm_databricks_workspace" "ws" {
       # BUG opened on https://github.com/hashicorp/terraform-provider-azurerm/issues/13086 - fixed in 2.91
       # aml_workspace_id = try(coalesce(
       #   try(var.settings.custom_parameters.machine_learning.id, null),
-      #   try(var.aml[var.client_config.landingzone_key][var.settings.custom_parameters.machine_learning.key].id, null),
-      #   try(var.aml[var.settings.custom_parameters.machine_learning.lz_key][var.settings.custom_parameters.vnet_key][var.settings.custom_parameters.machine_learning.key].id, null),
+      #   try(var.aml.id, null),
+      #   try(var.aml[var.settings.custom_parameters.machine_learning.key].id, null),
       #   ),
       #   null
       # )
 
-      virtual_network_id = can(var.settings.custom_parameters.virtual_network_id) || can(var.settings.custom_parameters.vnet_key) == false ? try(var.settings.custom_parameters.virtual_network_id, null) : var.vnets[try(var.settings.custom_parameters.lz_key, var.client_config.landingzone_key)][var.settings.custom_parameters.vnet_key].id
-      public_subnet_name = can(var.settings.custom_parameters.public_subnet_name) || can(var.settings.custom_parameters.vnet_key) == false ? try(var.settings.custom_parameters.public_subnet_name, null) : var.vnets[try(var.settings.custom_parameters.lz_key, var.client_config.landingzone_key)][var.settings.custom_parameters.vnet_key].subnets[var.settings.custom_parameters.public_subnet_key].name
+      virtual_network_id = can(var.settings.custom_parameters.virtual_network_id) || can(var.settings.custom_parameters.vnet_key) == false ? try(var.settings.custom_parameters.virtual_network_id, null) : var.vnets[var.settings.custom_parameters.vnet_key].id
+      public_subnet_name = can(var.settings.custom_parameters.public_subnet_name) || can(var.settings.custom_parameters.vnet_key) == false ? try(var.settings.custom_parameters.public_subnet_name, null) : var.vnets[var.settings.custom_parameters.vnet_key].subnets[var.settings.custom_parameters.public_subnet_key].name
 
       #the NSG-association ID is the subnet-id, so it can be simplified:
-      public_subnet_network_security_group_association_id = can(var.settings.custom_parameters.public_subnet_network_security_group_association_id) || can(var.settings.custom_parameters.public_subnet_key) == false ? try(var.settings.custom_parameters.public_subnet_network_security_group_association_id, null) : var.vnets[try(var.settings.custom_parameters.lz_key, var.client_config.landingzone_key)][var.settings.custom_parameters.vnet_key].subnets[var.settings.custom_parameters.public_subnet_key].id
-      private_subnet_name                                 = can(var.settings.custom_parameters.private_subnet_name) || can(var.settings.custom_parameters.private_subnet_key) == false ? try(var.settings.custom_parameters.private_subnet_name, null) : var.vnets[try(var.settings.custom_parameters.lz_key, var.client_config.landingzone_key)][var.settings.custom_parameters.vnet_key].subnets[var.settings.custom_parameters.private_subnet_key].name
+      public_subnet_network_security_group_association_id = can(var.settings.custom_parameters.public_subnet_network_security_group_association_id) || can(var.settings.custom_parameters.public_subnet_key) == false ? try(var.settings.custom_parameters.public_subnet_network_security_group_association_id, null) : var.vnets[var.settings.custom_parameters.vnet_key].subnets[var.settings.custom_parameters.public_subnet_key].id
+      private_subnet_name                                 = can(var.settings.custom_parameters.private_subnet_name) || can(var.settings.custom_parameters.private_subnet_key) == false ? try(var.settings.custom_parameters.private_subnet_name, null) : var.vnets[var.settings.custom_parameters.vnet_key].subnets[var.settings.custom_parameters.private_subnet_key].name
 
       #the NSG-association ID is the subnet-id, so it can be simplified:
-      private_subnet_network_security_group_association_id = can(var.settings.custom_parameters.private_subnet_network_security_group_association_id) || can(var.settings.custom_parameters.public_subnet_key) == false ? try(var.settings.custom_parameters.private_subnet_network_security_group_association_id, null) : var.vnets[try(var.settings.custom_parameters.lz_key, var.client_config.landingzone_key)][var.settings.custom_parameters.vnet_key].subnets[var.settings.custom_parameters.public_subnet_key].id
+      private_subnet_network_security_group_association_id = can(var.settings.custom_parameters.private_subnet_network_security_group_association_id) || can(var.settings.custom_parameters.public_subnet_key) == false ? try(var.settings.custom_parameters.private_subnet_network_security_group_association_id, null) : var.vnets[var.settings.custom_parameters.vnet_key].subnets[var.settings.custom_parameters.public_subnet_key].id
     }
   }
 }
