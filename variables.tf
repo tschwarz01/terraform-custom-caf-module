@@ -37,6 +37,12 @@ variable "client_config" {
   default = {}
 }
 
+## Azure AD
+variable "azuread" {
+  description = "Configuration object - Azure Active Directory resources"
+  default     = {}
+}
+
 variable "logged_user_objectId" {
   description = "Used to set access policies based on the value 'logged_in_user'. Can only be used in interactive execution with vscode."
   type        = string
