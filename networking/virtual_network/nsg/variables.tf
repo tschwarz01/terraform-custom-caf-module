@@ -19,11 +19,10 @@ variable "location" {
   description = "location of the resource"
 }
 
-/*
 variable "diagnostics" {
 
 }
-*/
+
 variable "application_security_groups" {
   default = {}
 }

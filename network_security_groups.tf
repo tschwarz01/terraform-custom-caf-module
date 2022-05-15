@@ -1,5 +1,5 @@
 module "network_security_groups" {
-  source = "./networking/netw ork_security_group"
+  source = "./networking/network_security_group"
 
   for_each = {
     for key, value in local.networking.network_security_group_definition : key => value

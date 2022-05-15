@@ -5,11 +5,11 @@ module "nsg_flows" {
     for key, subnet in var.subnets : key => subnet
     if try(var.network_security_group_definition[subnet.nsg_key].flow_logs, null) != null && try(var.network_security_group_definition[subnet.nsg_key].version, 0) == 0
   }
-
+  name              = try(var.network_security_group_definition[each.value.nsg_key].name, null) == null ? each.value.name : var.network_security_group_definition[each.value.nsg_key].name
   client_config     = var.client_config
   resource_id       = try(var.network_security_groups[each.value.nsg_key], null) == null ? azurerm_network_security_group.nsg_obj[each.key].id : var.network_security_groups[each.value.nsg_key].id
   resource_location = var.location
-  #diagnostics       = var.diagnostics
-  settings         = var.network_security_group_definition[each.value.nsg_key].flow_logs
-  network_watchers = var.network_watchers
+  diagnostics       = var.diagnostics
+  settings          = var.network_security_group_definition[each.value.nsg_key].flow_logs
+  network_watchers  = var.network_watchers
 }

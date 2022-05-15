@@ -1,6 +1,17 @@
+resource "azurecaf_name" "flow-log" {
+  name          = "${var.name}fl"
+  resource_type = "azurerm_network_security_group"
+  prefixes      = var.global_settings.prefixes
+  random_length = var.global_settings.random_length
+  clean_input   = true
+  passthrough   = var.global_settings.passthrough
+  use_slug      = var.global_settings.use_slug
+}
+
 resource "azurerm_network_watcher_flow_log" "flow" {
   count = try(var.settings, {}) == {} ? 0 : 1
 
+  name = resource.azurecaf_name.flow-log.result
 
   network_watcher_name = try(
     var.network_watchers[try(var.settings.lz_key, var.client_config.landingzone_key)][var.settings.network_watcher_key].name,

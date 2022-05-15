@@ -26,3 +26,11 @@ variable "global_settings" {
 variable "network_watchers" {
   default = {}
 }
+
+variable "name" {
+  default = "flow-log"
+}
+
+variable "tags" {
+  default = {}
+}
