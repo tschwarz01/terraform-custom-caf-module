@@ -34,21 +34,11 @@ resource "azurerm_virtual_network" "vnet" {
   */
 }
 
-locals {
-
-  subnets = {
-    for key, val in var.settings.subnets : key => val if val.should_create == true
-  }
-  special_subnets = {
-    for key, val in var.settings.special_subnets : key => val if val.should_create == true
-  }
-}
-
 module "special_subnets" {
   source = "./subnet"
 
   for_each = {
-    for key, value in try(local.special_subnets, {}) : key => value
+    for key, value in try(var.settings.special_subnets, {}) : key => value if value.should_create == true
   }
   #for_each                                       = lookup(var.settings, "specialsubnets", {})
   name                                           = each.value.name
@@ -66,7 +56,7 @@ module "subnets" {
   source = "./subnet"
 
   for_each = {
-    for key, value in try(local.subnets, {}) : key => value
+    for key, value in try(var.settings.subnets, {}) : key => value if value.should_create == true
   }
   #for_each                                       = lookup(var.settings, "subnets", {})
   name                                           = each.value.name
