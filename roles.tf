@@ -73,10 +73,10 @@ locals {
     #azurerm_firewalls                          = local.combined_objects_azurerm_firewalls
     #backup_vaults                              = local.combined_objects_backup_vaults
     #batch_accounts                             = local.combined_objects_batch_accounts
-    data_factory = local.combined_objects_data_factory
-    #databricks_workspaces                      = local.combined_objects_databricks_workspaces
-    #dns_zones = local.combined_objects_dns_zones
-    #event_hub_namespaces                       = local.combined_objects_event_hub_namespaces
+    data_factory          = local.combined_objects_data_factory
+    databricks_workspaces = local.combined_objects_databricks_workspaces
+    #dns_zones             = local.combined_objects_dns_zones
+    #event_hub_namespaces  = local.combined_objects_event_hub_namespaces
     keyvaults = local.combined_objects_keyvaults
     #kusto_clusters                             = local.combined_objects_kusto_clusters
     logged_in = local.logged_in
@@ -100,7 +100,7 @@ locals {
     resource_groups     = local.combined_objects_resource_groups
     storage_accounts    = local.combined_objects_storage_accounts
     storage_containers  = local.combined_objects_storage_containers
-    #synapse_workspaces                         = local.combined_objects_synapse_workspaces
+    synapse_workspaces  = local.combined_objects_synapse_workspaces
     #subscriptions   = local.combined_objects_subscriptions
     virtual_subnets = local.combined_objects_virtual_subnets
     log_analytics   = local.current_objects_log_analytics
