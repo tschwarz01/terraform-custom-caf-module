@@ -41,9 +41,9 @@ variable "vnets" {
   description = "Virtual networks objects - contains all virtual networks that could potentially be used by the module."
 }
 
-variable "aml" {
-  description = "Azure Machine Learning objects - contains all AML workspaces that could potentially be used by the module."
-}
+#variable "aml" {
+#  description = "Azure Machine Learning objects - contains all AML workspaces that could potentially be used by the module."
+#}
 
 variable "base_tags" {
   description = "Base tags for the resource to be inherited from the resource group."
