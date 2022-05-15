@@ -3,7 +3,10 @@ locals {
   combined_objects_application_security_groups                           = module.application_security_groups
   combined_objects_azuread_groups                                        = {}
   combined_objects_azuread_service_principals                            = {}
+  combined_objects_azuread_applications                                  = module.azuread_applications_v1
   combined_objects_azure_container_registries                            = module.container_registry
+  combined_objects_azurerm_firewalls                                     = module.azurerm_firewalls
+  combined_objects_azurerm_firewall_policies                             = module.azurerm_firewall_policies
   combined_objects_container_registry                                    = module.container_registry
   combined_objects_data_factory                                          = module.data_factory
   combined_objects_data_factory_integration_runtime_self_hosted          = module.data_factory_integration_runtime_self_hosted

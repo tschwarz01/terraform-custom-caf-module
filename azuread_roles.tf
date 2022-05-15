@@ -31,6 +31,7 @@ module "azuread_roles_msi" {
   azuread_roles = each.value.roles
 }
 
+/*
 module "azuread_roles_sql_mi" {
   source   = "./azuread/roles"
   for_each = try(local.azuread.azuread_roles.mssql_managed_instances, {})
@@ -54,3 +55,4 @@ module "azuread_roles_mssql_server" {
   object_id     = module.mssql_servers[each.key].rbac_id
   azuread_roles = each.value.roles
 }
+*/

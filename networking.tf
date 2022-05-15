@@ -1,6 +1,6 @@
-
 output "vnets" {
-  value = module.networking
+  depends_on = [azurerm_virtual_network_peering.peering]
+  value      = module.networking
 }
 
 output "virtual_subnets" {
@@ -15,6 +15,11 @@ output "public_ip_prefixes" {
   value = module.public_ip_prefixes
 }
 
+#output "network_watchers" {
+#  value = module.network_watchers
+#}
+
+
 #
 #
 # Virtual network
@@ -22,19 +27,25 @@ output "public_ip_prefixes" {
 #
 
 module "networking" {
+  #depends_on = [module.network_watchers]
   source   = "./networking/virtual_network"
   for_each = local.networking.vnets
 
-  #client_config   = try(local.client_config, {})
-  global_settings         = local.global_settings
-  settings                = each.value
-  tags                    = try(each.value.tags, null)
-  network_security_groups = module.network_security_groups
-  diagnostics             = local.combined_diagnostics
-  route_tables            = module.route_tables
-  resource_group_name     = local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].name
-  location                = lookup(each.value, "region", null) == null ? local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].location : local.global_settings.regions[each.value.region]
-  base_tags               = try(local.global_settings.inherit_tags, false) ? try(local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].tags, {}) : {}
+  application_security_groups = local.combined_objects_application_security_groups
+  client_config               = try(local.client_config, {})
+  #ddos_id                           = try(local.combined_objects_ddos_services[try(each.value.ddos_services_key, each.value.ddos_services_key)].id, "")
+  diagnostics                       = local.combined_diagnostics
+  global_settings                   = local.global_settings
+  network_security_groups           = module.network_security_groups
+  network_security_group_definition = local.networking.network_security_group_definition
+  #network_watchers                  = local.combined_objects_network_watchers
+  route_tables = module.route_tables
+  settings     = each.value
+  tags         = try(each.value.tags, null)
+
+  resource_group_name = local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].name
+  location            = lookup(each.value, "region", null) == null ? local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].location : local.global_settings.regions[each.value.region]
+  base_tags           = try(local.global_settings.inherit_tags, false) ? try(local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].tags, {}) : {}
 
   remote_dns = {
     azurerm_firewall = try(var.remote_objects.azurerm_firewalls, null) #assumed from remote lz only
@@ -60,43 +71,6 @@ module "virtual_subnets" {
 
 }
 
-
-
-#
-#
-# Vnet peering
-#  (Support vnet in remote tfstates)
-#
-
-# naming convention for peering name
-resource "azurecaf_name" "peering" {
-  for_each = local.networking.vnet_peerings
-
-  name          = try(each.value.name, "")
-  resource_type = "azurerm_virtual_network_peering"
-  prefixes      = local.global_settings.prefixes
-  random_length = local.global_settings.random_length
-  clean_input   = true
-  passthrough   = local.global_settings.passthrough
-  use_slug      = local.global_settings.use_slug
-}
-
-# The code tries to peer to a vnet created in the same landing zone. If it fails it tries with the data remote state
-resource "azurerm_virtual_network_peering" "peering" {
-  depends_on = [module.networking]
-  for_each   = local.networking.vnet_peerings
-
-  name                         = azurecaf_name.peering[each.key].result
-  virtual_network_name         = can(each.value.from.virtual_network_name) ? each.value.from.virtual_network_name : local.combined_objects_networking[each.value.from.vnet_key].name
-  resource_group_name          = can(each.value.from.resource_group_name) ? each.value.from.resource_group_name : local.combined_objects_networking[each.value.from.vnet_key].resource_group_name
-  remote_virtual_network_id    = can(each.value.to.remote_virtual_network_id) ? each.value.to.remote_virtual_network_id : local.combined_objects_networking[each.value.to.vnet_key].id
-  allow_virtual_network_access = try(each.value.allow_virtual_network_access, true)
-  allow_forwarded_traffic      = try(each.value.allow_forwarded_traffic, false)
-  allow_gateway_transit        = try(each.value.allow_gateway_transit, false)
-  use_remote_gateways          = try(each.value.use_remote_gateways, false)
-
-}
-
 resource "azurerm_subnet_route_table_association" "rt" {
   for_each = {
     for key, subnet in local.networking.virtual_subnets : key => subnet
@@ -117,93 +91,6 @@ resource "azurerm_subnet_network_security_group_association" "nsg_vnet_associati
   network_security_group_id = module.network_security_groups[each.value.nsg_key].id
 }
 
-
-#
-#
-# Route tables and routes
-#
-#
-resource "azurecaf_name" "route_tables" {
-  for_each = local.networking.route_tables
-
-  name          = try(each.value.name, null)
-  resource_type = "azurerm_route_table"
-  prefixes      = local.global_settings.prefixes
-  random_length = local.global_settings.random_length
-  clean_input   = true
-  passthrough   = local.global_settings.passthrough
-  use_slug      = local.global_settings.use_slug
-}
-
-module "route_tables" {
-  source   = "./networking/route_tables"
-  for_each = local.networking.route_tables
-
-  name                          = azurecaf_name.route_tables[each.key].result
-  location                      = can(local.global_settings.regions[each.value.region]) ? local.global_settings.regions[each.value.region] : local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].location
-  resource_group_name           = can(each.value.resource_group.name) || can(each.value.resource_group_name) ? try(each.value.resource_group.name, each.value.resource_group_name) : local.combined_objects_resource_groups[try(each.value.resource_group_key, each.value.resource_group.key)].name
-  base_tags                     = try(local.global_settings.inherit_tags, false) ? try(local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].tags, {}) : {}
-  disable_bgp_route_propagation = try(each.value.disable_bgp_route_propagation, null)
-  tags                          = try(each.value.tags, null)
-}
-
-resource "azurecaf_name" "routes" {
-  for_each = local.networking.azurerm_routes
-
-  name          = try(each.value.name, null)
-  resource_type = "azurerm_route"
-  prefixes      = local.global_settings.prefixes
-  random_length = local.global_settings.random_length
-  clean_input   = true
-  passthrough   = local.global_settings.passthrough
-  use_slug      = local.global_settings.use_slug
-}
-
-/*
-module "routes" {
-  source   = "./networking/routes"
-  for_each = local.networking.azurerm_routes
-
-  name                   = azurecaf_name.routes[each.key].result
-  resource_group_name    = can(each.value.resource_group.name) || can(each.value.resource_group_name) ? try(each.value.resource_group.name, each.value.resource_group_name) : local.combined_objects_resource_groups[try(each.value.resource_group_key, each.value.resource_group.key)].name
-  route_table_name       = module.route_tables[each.value.route_table_key].name
-  address_prefix         = each.value.address_prefix
-  next_hop_type          = each.value.next_hop_type
-  next_hop_in_ip_address = try(lower(each.value.next_hop_type), null) == "virtualappliance" ? try(each.value.next_hop_in_ip_address, null) : null
-  next_hop_in_ip_address_fw = try(lower(each.value.next_hop_type), null) == "virtualappliance" ? try(coalesce(
-    try(local.combined_objects_azurerm_firewalls[each.value.private_ip_keys.azurerm_firewall.key].ip_configuration[each.value.private_ip_keys.azurerm_firewall.interface_index].private_ip_address, null),
-    try(local.combined_objects_azurerm_firewalls[each.value.private_ip_keys.azurerm_firewall.key].ip_configuration[each.value.private_ip_keys.azurerm_firewall.interface_index].private_ip_address, null)
-  ), null) : null
-
-}
-
-*/
-
-# Allow creating from and to in the same deployment when vnets are in different subscriptions
-# (azurerm does not access the resource id of the vnet in the from)
-# use the variable vnet_peerings_v1
-resource "azapi_resource" "virtualNetworkPeerings" {
-  depends_on = [module.networking]
-  for_each   = local.networking.vnet_peerings_v1
-
-  type      = "Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2021-05-01"
-  name      = each.value.name
-  parent_id = can(each.value.from.id) ? each.value.from.id : local.combined_objects_networking[each.value.from.vnet_key].id
-
-  body = jsonencode({
-    properties = {
-      allowForwardedTraffic     = try(each.value.allow_forwarded_traffic, false)
-      allowGatewayTransit       = try(each.value.allow_gateway_transit, false)
-      allowVirtualNetworkAccess = try(each.value.allow_virtual_network_access, true)
-      doNotVerifyRemoteGateways = try(each.value.do_not_verify_remote_gateways, false)
-      useRemoteGateways         = try(each.value.use_remote_gateways, false)
-      remoteVirtualNetwork = {
-        id = can(each.value.to.remote_virtual_network_id) || can(each.value.to.id) ? try(each.value.to.remote_virtual_network_id, each.value.to.id) : local.combined_objects_networking[each.value.to.vnet_key].id
-      }
-    }
-  })
-
-}
 
 #
 #
@@ -287,3 +174,126 @@ module "public_ip_prefixes" {
   diagnostics         = local.combined_diagnostics
   base_tags           = try(local.global_settings.inherit_tags, false) ? try(local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].tags, {}) : {}
 }
+
+#
+#
+# Vnet peering
+#  (Support vnet in remote tfstates)
+#
+
+# naming convention for peering name
+resource "azurecaf_name" "peering" {
+  for_each = local.networking.vnet_peerings
+
+  name          = try(each.value.name, "")
+  resource_type = "azurerm_virtual_network_peering"
+  prefixes      = local.global_settings.prefixes
+  random_length = local.global_settings.random_length
+  clean_input   = true
+  passthrough   = local.global_settings.passthrough
+  use_slug      = local.global_settings.use_slug
+}
+
+# The code tries to peer to a vnet created in the same landing zone. If it fails it tries with the data remote state
+resource "azurerm_virtual_network_peering" "peering" {
+  depends_on = [module.networking]
+  for_each   = local.networking.vnet_peerings
+
+  name                         = azurecaf_name.peering[each.key].result
+  virtual_network_name         = can(each.value.from.virtual_network_name) ? each.value.from.virtual_network_name : local.combined_objects_networking[each.value.from.vnet_key].name
+  resource_group_name          = can(each.value.from.resource_group_name) ? each.value.from.resource_group_name : local.combined_objects_networking[each.value.from.vnet_key].resource_group_name
+  remote_virtual_network_id    = can(each.value.to.remote_virtual_network_id) ? each.value.to.remote_virtual_network_id : local.combined_objects_networking[each.value.to.vnet_key].id
+  allow_virtual_network_access = try(each.value.allow_virtual_network_access, true)
+  allow_forwarded_traffic      = try(each.value.allow_forwarded_traffic, false)
+  allow_gateway_transit        = try(each.value.allow_gateway_transit, false)
+  use_remote_gateways          = try(each.value.use_remote_gateways, false)
+
+}
+
+# Allow creating from and to in the same deployment when vnets are in different subscriptions
+# (azurerm does not access the resource id of the vnet in the from)
+# use the variable vnet_peerings_v1
+resource "azapi_resource" "virtualNetworkPeerings" {
+  depends_on = [module.networking]
+  for_each   = local.networking.vnet_peerings_v1
+
+  type      = "Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2021-05-01"
+  name      = each.value.name
+  parent_id = can(each.value.from.id) ? each.value.from.id : local.combined_objects_networking[each.value.from.vnet_key].id
+
+  body = jsonencode({
+    properties = {
+      allowForwardedTraffic     = try(each.value.allow_forwarded_traffic, false)
+      allowGatewayTransit       = try(each.value.allow_gateway_transit, false)
+      allowVirtualNetworkAccess = try(each.value.allow_virtual_network_access, true)
+      doNotVerifyRemoteGateways = try(each.value.do_not_verify_remote_gateways, false)
+      useRemoteGateways         = try(each.value.use_remote_gateways, false)
+      remoteVirtualNetwork = {
+        id = can(each.value.to.remote_virtual_network_id) || can(each.value.to.id) ? try(each.value.to.remote_virtual_network_id, each.value.to.id) : local.combined_objects_networking[each.value.to.vnet_key].id
+      }
+    }
+  })
+
+}
+
+#
+#
+# Route tables and routes
+#
+#
+resource "azurecaf_name" "route_tables" {
+  for_each = local.networking.route_tables
+
+  name          = try(each.value.name, null)
+  resource_type = "azurerm_route_table"
+  prefixes      = local.global_settings.prefixes
+  random_length = local.global_settings.random_length
+  clean_input   = true
+  passthrough   = local.global_settings.passthrough
+  use_slug      = local.global_settings.use_slug
+}
+
+module "route_tables" {
+  source   = "./networking/route_tables"
+  for_each = local.networking.route_tables
+
+  name                          = azurecaf_name.route_tables[each.key].result
+  location                      = can(local.global_settings.regions[each.value.region]) ? local.global_settings.regions[each.value.region] : local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].location
+  resource_group_name           = can(each.value.resource_group.name) || can(each.value.resource_group_name) ? try(each.value.resource_group.name, each.value.resource_group_name) : local.combined_objects_resource_groups[try(each.value.resource_group_key, each.value.resource_group.key)].name
+  base_tags                     = try(local.global_settings.inherit_tags, false) ? try(local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].tags, {}) : {}
+  disable_bgp_route_propagation = try(each.value.disable_bgp_route_propagation, null)
+  tags                          = try(each.value.tags, null)
+}
+
+resource "azurecaf_name" "routes" {
+  for_each = local.networking.azurerm_routes
+
+  name          = try(each.value.name, null)
+  resource_type = "azurerm_route"
+  prefixes      = local.global_settings.prefixes
+  random_length = local.global_settings.random_length
+  clean_input   = true
+  passthrough   = local.global_settings.passthrough
+  use_slug      = local.global_settings.use_slug
+}
+
+
+module "routes" {
+  source   = "./networking/routes"
+  for_each = local.networking.azurerm_routes
+
+  name                   = azurecaf_name.routes[each.key].result
+  resource_group_name    = can(each.value.resource_group.name) || can(each.value.resource_group_name) ? try(each.value.resource_group.name, each.value.resource_group_name) : local.combined_objects_resource_groups[try(each.value.resource_group_key, each.value.resource_group.key)].name
+  route_table_name       = module.route_tables[each.value.route_table_key].name
+  address_prefix         = each.value.address_prefix
+  next_hop_type          = each.value.next_hop_type
+  next_hop_in_ip_address = try(lower(each.value.next_hop_type), null) == "virtualappliance" ? try(each.value.next_hop_in_ip_address, null) : null
+  next_hop_in_ip_address_fw = try(lower(each.value.next_hop_type), null) == "virtualappliance" ? try(coalesce(
+    try(local.combined_objects_azurerm_firewalls[each.value.private_ip_keys.azurerm_firewall.key].ip_configuration[each.value.private_ip_keys.azurerm_firewall.interface_index].private_ip_address, null),
+    try(local.combined_objects_azurerm_firewalls[each.value.private_ip_keys.azurerm_firewall.key].ip_configuration[each.value.private_ip_keys.azurerm_firewall.interface_index].private_ip_address, null)
+  ), null) : null
+
+}
+
+
+
