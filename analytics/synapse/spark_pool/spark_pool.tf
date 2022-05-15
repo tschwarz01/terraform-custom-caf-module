@@ -12,14 +12,18 @@ resource "azurecaf_name" "sparkpool" {
 # Tested with: AzureRM provider 2.57.0
 
 resource "azurerm_synapse_spark_pool" "spark_pool" {
-  name                 = azurecaf_name.sparkpool.result
-  synapse_workspace_id = var.synapse_workspace_id
-  node_size_family     = var.settings.node_size_family
-  node_size            = var.settings.node_size
-  node_count           = try(var.settings.node_count, null)
-  spark_log_folder     = try(var.settings.spark_log_folder, "/logs")
-  spark_events_folder  = try(var.settings.spark_events_folder, "/events")
-  spark_version        = try(var.settings.spark_version, "2.4")
+  name                                = azurecaf_name.sparkpool.result
+  synapse_workspace_id                = var.synapse_workspace_id
+  node_size_family                    = var.settings.node_size_family
+  node_size                           = var.settings.node_size
+  node_count                          = try(var.settings.node_count, null)
+  cache_size                          = try(var.settings.cache_size, null)
+  compute_isolation_enabled           = try(var.settings.node_size, null) == "XXXLarge" ? try(var.settings.compute_isolation_enabled, null) : false
+  dynamic_executor_allocation_enabled = try(var.settings.dynamic_executor_allocation_enabled, null)
+  session_level_packages_enabled      = try(var.settings.session_level_packages_enabled, null)
+  spark_log_folder                    = try(var.settings.spark_log_folder, "/logs")
+  spark_events_folder                 = try(var.settings.spark_events_folder, "/events")
+  spark_version                       = try(var.settings.spark_version, "2.4")
 
   auto_scale {
     max_node_count = var.settings.auto_scale.max_node_count
@@ -36,6 +40,15 @@ resource "azurerm_synapse_spark_pool" "spark_pool" {
     content {
       content  = var.settings.library_requirement.content
       filename = var.settings.library_requirement.filename
+    }
+  }
+
+  dynamic "spark_config" {
+    for_each = try(var.settings.spark_config, {})
+
+    content {
+      content  = try(var.settings.spark_config.content, null)
+      filename = try(var.settings.spark_config.filename, null)
     }
   }
 
