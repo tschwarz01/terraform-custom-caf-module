@@ -33,6 +33,7 @@ locals {
   combined_objects_storage_accounts                                      = module.storage_accounts
   combined_objects_storage_containers                                    = module.storage_containers
   combined_objects_synapse_privatelink_hubs                              = module.synpase_privatelink_hubs
+  combined_objects_synapse_workspaces                                    = module.synapse_workspaces
   combined_objects_virtual_subnets                                       = module.virtual_subnets
   combined_objects_virtual_machines                                      = module.virtual_machines
   combined_objects_virtual_machine_scale_sets                            = module.virtual_machine_scale_sets

@@ -172,3 +172,8 @@ variable "vmss_extensions_custom_script_adf_integration_runtime" {
 variable "database" {
   default = {}
 }
+
+
+variable "twstest" {
+  default = {}
+}

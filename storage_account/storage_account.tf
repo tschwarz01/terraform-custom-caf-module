@@ -159,7 +159,7 @@ resource "azurerm_storage_account" "stg" {
       default_action = try(var.storage_account.network.default_action, "Deny")
       ip_rules       = try(var.storage_account.network.ip_rules, [])
       virtual_network_subnet_ids = try(var.storage_account.network.subnets, null) == null ? null : [
-        for key, value in var.storage_account.network.subnets : can(value.remote_subnet_id) ? value.remote_subnet_id : var.vnets[value.vnet_key].subnets[value.subnet_key].id
+        for key, value in var.storage_account.network.subnets : can(value.remote_subnet_id) ? value.remote_subnet_id : var.remote_objects.vnets[value.vnet_key].subnets[value.subnet_key].id
       ]
     }
   }

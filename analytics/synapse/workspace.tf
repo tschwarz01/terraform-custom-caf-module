@@ -28,12 +28,22 @@ resource "azurerm_synapse_workspace" "ws" {
   }
 
   dynamic "aad_admin" {
-    for_each = try(var.settings.aad_admin, {})
+    for_each = try(var.settings.aad_admin, {}) == {} ? [] : [1]
 
     content {
       login     = var.settings.aad_admin.login
       object_id = var.settings.aad_admin.object_id
       tenant_id = var.settings.aad_admin.tenant_id
+    }
+  }
+
+  dynamic "sql_aad_admin" {
+    for_each = try(var.settings.sql_aad_admin, {}) == {} ? [] : [1]
+
+    content {
+      login     = var.settings.sql_aad_admin.login
+      object_id = var.settings.sql_aad_admin.object_id
+      tenant_id = var.settings.sql_aad_admin.tenant_id
     }
   }
 

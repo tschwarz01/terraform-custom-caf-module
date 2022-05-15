@@ -10,8 +10,8 @@ resource "azurecaf_name" "df" {
 
 resource "azurerm_data_factory" "df" {
   name                = azurecaf_name.df.result
-  resource_group_name = local.resource_group_name
-  location            = local.location
+  resource_group_name = var.resource_group_name
+  location            = var.location
 
   dynamic "github_configuration" {
     for_each = try(var.settings.github_configuration, null) != null ? [var.settings.github_configuration] : []
@@ -37,7 +37,7 @@ resource "azurerm_data_factory" "df" {
     for_each = can(var.settings.identity) ? [var.settings.identity] : []
     content {
       type         = identity.value.type
-      identity_ids = concat(local.managed_identities, try(identity.value.identity_ids, []))
+      identity_ids = var.remote_objects.managed_identities[identity.value.managed_identity_key].id
     }
   }
 
