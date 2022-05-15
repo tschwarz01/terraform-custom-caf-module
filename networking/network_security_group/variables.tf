@@ -9,11 +9,9 @@ variable "location" {
   type        = string
 }
 
-/*
 variable "diagnostics" {
   description = "(Required) Diagnostics object with the definitions and destination services"
 }
-*/
 
 variable "settings" {
   description = "(Required) configuration object describing the networking configuration, as described in README"
@@ -32,11 +30,9 @@ variable "network_watchers" {
   default     = {}
 }
 
-/*
 variable "client_config" {
   description = "client_config object (see module README.md)"
 }
-*/
 
 variable "application_security_groups" {
   description = "Application Security Groups to attach the NSG"
