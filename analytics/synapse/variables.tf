@@ -2,6 +2,10 @@ variable "settings" {
   description = "Configuration object for the Synapse workspace."
 }
 
+variable "client_config" {
+  default = {}
+}
+
 variable "global_settings" {
   description = "Global settings object (see module README.md)"
 }
@@ -29,4 +33,8 @@ variable "keyvault_id" {
 variable "base_tags" {
   description = "Base tags for the resource to be inherited from the resource group."
   type        = map(any)
+}
+
+variable "remote_objects" {
+  default = {}
 }
