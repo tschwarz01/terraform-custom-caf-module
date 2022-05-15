@@ -3,7 +3,7 @@
 #
 
 module "azuread_users" {
-  source     = "./modules/azuread/users"
+  source     = "./azuread/users"
   depends_on = [module.keyvault_access_policies]
   for_each   = local.azuread.azuread_users
 

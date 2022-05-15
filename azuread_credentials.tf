@@ -1,6 +1,6 @@
 # Module for the CAf variable azuread_apps
 module "azuread_credentials" {
-  source     = "./modules/azuread/credentials"
+  source     = "./azuread/credentials"
   depends_on = [module.keyvault_access_policies]
   for_each   = local.azuread.azuread_credentials
 

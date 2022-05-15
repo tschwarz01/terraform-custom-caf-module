@@ -3,7 +3,7 @@
 #
 
 module "azuread_service_principal_passwords" {
-  source     = "./modules/azuread/service_principal_password"
+  source     = "./azuread/service_principal_password"
   depends_on = [module.keyvault_access_policies]
   for_each   = local.azuread.azuread_service_principal_passwords
 

@@ -3,7 +3,7 @@
 #
 
 module "azuread_service_principals" {
-  source   = "./modules/azuread/service_principal"
+  source   = "./azuread/service_principal"
   for_each = local.azuread.azuread_service_principals
 
   client_config           = local.client_config

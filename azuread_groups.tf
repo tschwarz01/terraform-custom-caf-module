@@ -4,7 +4,7 @@
 #
 
 module "azuread_groups" {
-  source   = "./modules/azuread/groups"
+  source   = "./azuread/groups"
   for_each = local.azuread.azuread_groups
 
   global_settings = local.global_settings
@@ -19,7 +19,7 @@ output "azuread_groups" {
 }
 
 module "azuread_groups_members" {
-  source   = "./modules/azuread/groups_members"
+  source   = "./azuread/groups_members"
   for_each = local.azuread.azuread_groups
 
   client_config              = local.client_config
@@ -32,7 +32,7 @@ module "azuread_groups_members" {
 
 # Module to decouple AD Group membership to remote AD Groups
 module "azuread_groups_membership" {
-  source   = "./modules/azuread/groups_members"
+  source   = "./azuread/groups_members"
   for_each = local.azuread.azuread_groups_membership
 
   client_config              = local.client_config
