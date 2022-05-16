@@ -52,9 +52,11 @@ module "data_factory_integration_runtime_shared_self_hosted" {
   client_config   = local.client_config
   settings        = each.value
 
-  data_factory_id            = can(each.value.data_factory.id) ? each.value.data_factory.id : local.combined_objects_data_factory[each.value.data_factory.key].id
-  data_factory_mi_id         = can(each.value.data_factory.id) ? each.value.data_factory.id : local.combined_objects_data_factory[each.value.data_factory.key].identity[0].principal_id
-  shared_runtime_resource_id = try(can(each.value.remote_data_factory.resource_id) ? each.value.remote_data_factory.resource_id : local.combined_objects_data_factory[each.value.remote_data_factory.key].id, null)
+  data_factory_id    = can(each.value.data_factory.id) ? each.value.data_factory.id : local.combined_objects_data_factory[each.value.data_factory.key].id
+  data_factory_mi_id = can(each.value.data_factory.id) ? each.value.data_factory.id : local.combined_objects_data_factory[each.value.data_factory.key].identity[0].principal_id
+
+  shared_runtime_resource_id     = try(can(each.value.existing_data_factory.runtime_resource_id) ? each.value.existing_data_factory.runtime_resource_id : local.combined_objects_data_factory_integration_runtime_self_hosted[each.value.existing_data_factory.runtime_key].id, null)
+  shared_runtime_data_factory_id = try(can(each.value.existing_data_factory.resource_id) ? each.value.existing_data_factory.resource_id : local.combined_objects_data_factory[each.value.existing_data_factory.key].id, null)
 
   remote_objects = {
     data_factory   = local.combined_objects_data_factory

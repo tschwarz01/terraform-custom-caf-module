@@ -177,7 +177,11 @@ variable "database" {
   default = {}
 }
 
+variable "cloud" {
+  default = {}
+}
 
 variable "twstest" {
   default = {}
 }
+

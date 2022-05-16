@@ -4,31 +4,26 @@ variable "global_settings" {
 variable "client_config" {
   description = "Client configuration object (see module README.md)."
 }
-variable "settings" {
-  description = "(Required) Used to handle passthrough paramenters."
+variable "settings" {}
+variable "resource_group_name" {
+  description = "(Required) The name of the resource group where to create the resource."
+  type        = string
 }
-variable "remote_objects" {
+variable "location" {
   description = "(Required) Specifies the supported Azure location where to create the resource. Changing this forces a new resource to be created."
-  default     = {}
+  type        = string
 }
+#variable "storage_accounts" {}
+#variable "azuread_groups" {}
+#variable "vnets" {}
+#variable "private_endpoints" {}
+#variable "resource_groups" {}
 variable "base_tags" {
   description = "Base tags for the resource to be inherited from the resource group."
   type        = map(any)
-  default     = {}
 }
-
-variable "data_factory_id" {
-  description = "The id of the Data Factory which will own the self-hosted integration runtime."
-}
-
-variable "shared_runtime_resource_id" {
-  type = string
-}
-
-variable "data_factory_mi_id" {
-  type = string
-}
-
-variable "shared_runtime_data_factory_id" {
-  type = string
-}
+#variable "private_dns" {
+#  default = {}
+#}
+variable "keyvault_id" {}
+variable "remote_objects" {}
