@@ -21,3 +21,10 @@ variable "data_factory_id" {
   description = "The id of the Data Factory which will own the self-hosted integration runtime."
 }
 
+variable "shared_runtime_resource_id" {
+  type = string
+}
+
+variable "data_factory_mi_id" {
+  type = string
+}

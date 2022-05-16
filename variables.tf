@@ -153,6 +153,10 @@ variable "data_factory_integration_runtime_self_hosted" {
   default = {}
 }
 
+variable "data_factory_integration_runtime_shared_self_hosted" {
+  default = {}
+}
+
 variable "purview" {
   default = {}
 }

@@ -9,7 +9,7 @@ module "synapse_workspaces" {
   client_config                        = local.client_config
   settings                             = each.value
   storage_data_lake_gen2_filesystem_id = can(each.value.storage_data_lake_gen2_filesystem_id) || can(each.value.data_lake_filesystem.container_key) == false ? try(each.value.storage_data_lake_gen2_filesystem_id, null) : local.combined_objects_storage_accounts[each.value.data_lake_filesystem.storage_account_key].data_lake_filesystems[each.value.data_lake_filesystem.container_key].id
-  keyvault_id                          = try(each.value.sql_administrator_login_password, null) == null ? module.keyvaults[each.value.keyvault_key].id : null
+  keyvault_id                          = try(each.value.sql_administrator_login_password, null) == null ? local.combined_objects_keyvaults[each.value.keyvault_key].id : null
   base_tags                            = try(local.global_settings.inherit_tags, false) ? try(local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].tags, {}) : {}
 
   remote_objects = {
