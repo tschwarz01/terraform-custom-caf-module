@@ -9,14 +9,14 @@ resource "azurecaf_name" "dfirsh" {
 }
 
 resource "azurerm_role_assignment" "target" {
-  scope                = var.shared_runtime_resource_id
+  scope                = var.shared_runtime_data_factory_id
   role_definition_name = "Contributor"
   principal_id         = var.data_factory_mi_id
 }
 
 resource "time_sleep" "delay" {
   depends_on      = [azurerm_role_assignment.target]
-  create_duration = "15s"
+  create_duration = "180s"
 }
 
 resource "azurerm_data_factory_integration_runtime_self_hosted" "dfirsh" {
