@@ -33,11 +33,12 @@ resource "azurerm_data_factory" "df" {
       value = global_parameter.value.value
     }
   }
+
   dynamic "identity" {
-    for_each = can(var.settings.identity) ? [var.settings.identity] : []
+    for_each = lookup(var.settings, "enable_system_msi", false) == false ? [] : [1]
+
     content {
-      type         = identity.value.type
-      identity_ids = var.remote_objects.managed_identities[identity.value.managed_identity_key].id
+      type = "SystemAssigned"
     }
   }
 

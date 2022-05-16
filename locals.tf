@@ -103,8 +103,9 @@ locals {
   }
 
   data_factory = {
-    data_factory                                 = try(var.data_factory.data_factory, {})
-    data_factory_integration_runtime_self_hosted = try(var.data_factory.data_factory_integration_runtime_self_hosted, {})
+    data_factory                                        = try(var.data_factory.data_factory, {})
+    data_factory_integration_runtime_self_hosted        = try(var.data_factory.data_factory_integration_runtime_self_hosted, {})
+    data_factory_integration_runtime_shared_self_hosted = try(var.data_factory.data_factory_integration_runtime_shared_self_hosted, {})
   }
 }
 

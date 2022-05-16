@@ -34,7 +34,6 @@ module "data_factory_integration_runtime_self_hosted" {
   settings        = each.value
 
   data_factory_id = can(each.value.data_factory.id) ? each.value.data_factory.id : local.combined_objects_data_factory[each.value.data_factory.key].id
-  #data_factory_id   = can(local.combined_objects_data_factory[each.value.data_factory.key] ? local.combined_objects_data_factory[each.value.data_factory.key].id : local.combined_objects_data_factory[each.value.data_factory.key].id)
 
   remote_objects = {
     data_factory   = local.combined_objects_data_factory
@@ -43,6 +42,27 @@ module "data_factory_integration_runtime_self_hosted" {
 }
 output "data_factory_integration_runtime_self_hosted" {
   value = module.data_factory_integration_runtime_self_hosted
+}
+
+module "data_factory_integration_runtime_shared_self_hosted" {
+  source   = "./data_factory/data_factory_integration_runtime_shared_self_hosted"
+  for_each = local.data_factory.data_factory_integration_runtime_shared_self_hosted
+
+  global_settings = local.global_settings
+  client_config   = local.client_config
+  settings        = each.value
+
+  data_factory_id            = can(each.value.data_factory.id) ? each.value.data_factory.id : local.combined_objects_data_factory[each.value.data_factory.key].id
+  data_factory_mi_id         = can(each.value.data_factory.id) ? each.value.data_factory.id : local.combined_objects_data_factory[each.value.data_factory.key].identity[0].principal_id
+  shared_runtime_resource_id = try(can(each.value.remote_data_factory.resource_id) ? each.value.remote_data_factory.resource_id : local.combined_objects_data_factory[each.value.remote_data_factory.key].id, null)
+
+  remote_objects = {
+    data_factory   = local.combined_objects_data_factory
+    resource_group = local.combined_objects_resource_groups
+  }
+}
+output "data_factory_integration_runtime_shared_self_hosted" {
+  value = module.data_factory_integration_runtime_shared_self_hosted
 }
 
 /*
