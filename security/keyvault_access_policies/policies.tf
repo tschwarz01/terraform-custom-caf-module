@@ -8,9 +8,7 @@ module "azuread_apps" {
 
   keyvault_id = coalesce(
     var.keyvault_id,
-    try(var.keyvaults[var.keyvault_key].id, null),
-    try(var.keyvaults[var.keyvault_key].id, null),
-    try(var.keyvaults[var.keyvault_key].id, null) // For backward compatibility
+    try(var.keyvaults[var.keyvault_key].id, null)
   )
 
   access_policy = each.value
@@ -36,7 +34,6 @@ module "azuread_service_principals" {
   tenant_id     = var.resources.azuread_service_principals[each.value.azuread_service_principal_key].tenant_id
 
   object_id = coalesce(
-    try(var.resources.azuread_service_principals[each.value.azuread_service_principal_key].object_id, null),
     try(var.resources.azuread_service_principals[each.value.azuread_service_principal_key].object_id, null)
   )
 }
@@ -50,9 +47,7 @@ module "azuread_group" {
 
   keyvault_id = coalesce(
     var.keyvault_id,
-    try(var.keyvaults[var.keyvault_key].id, null),
-    try(var.keyvaults[var.keyvault_key].id, null),
-    try(var.keyvaults[var.keyvault_key].id, null) // For backward compatibility
+    try(var.keyvaults[var.keyvault_key].id, null)
   )
 
   access_policy = each.value
@@ -127,7 +122,6 @@ module "managed_identity" {
   tenant_id     = var.client_config.tenant_id
 
   object_id = coalesce(
-    try(var.resources.managed_identities[each.value.managed_identity_key].principal_id, null),
     try(var.resources.managed_identities[each.value.managed_identity_key].principal_id, null)
   )
 }

@@ -1,6 +1,6 @@
-variable "common_module_params" {
-  default = {}
-}
+#variable "common_module_params" {
+#  default = {}
+#}
 
 variable "global_settings" {
   description = "Global settings object (see module README.md)"

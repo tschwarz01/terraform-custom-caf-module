@@ -14,7 +14,7 @@ module "dynamic_keyvault_secrets" {
   }
 
   settings = each.value
-  keyvault = local.combined_objects_keyvaults[local.client_config.landingzone_key][each.key]
+  keyvault = local.combined_objects_keyvaults[each.key]
 }
 
 output "dynamic_keyvault_secrets" {
