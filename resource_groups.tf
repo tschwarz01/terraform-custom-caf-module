@@ -4,11 +4,11 @@ module "resource_groups" {
     for key, value in try(local.deploy_resource_groups, {}) : key => value
   }
 
-  resource_group_name  = each.value.name
-  settings             = each.value
-  global_settings      = local.global_settings
-  tags                 = merge(lookup(each.value, "tags", {}), var.common_module_params.tags)
-  common_module_params = var.common_module_params
+  resource_group_name = each.value.name
+  settings            = each.value
+  global_settings     = local.global_settings
+  tags                = merge(lookup(each.value, "tags", {}), var.common_module_params.tags)
+  # common_module_params = var.common_module_params
 }
 
 module "resource_group_reused" {
