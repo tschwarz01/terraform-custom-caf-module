@@ -16,7 +16,7 @@ resource "azurerm_role_assignment" "target" {
 
 resource "time_sleep" "delay" {
   depends_on      = [azurerm_role_assignment.target]
-  create_duration = "180s"
+  create_duration = "300s"
 }
 
 resource "azurerm_data_factory_integration_runtime_self_hosted" "dfirsh" {
