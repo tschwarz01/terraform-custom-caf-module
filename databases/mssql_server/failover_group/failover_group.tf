@@ -11,7 +11,6 @@ resource "azurecaf_name" "failover_group" {
 resource "azurerm_mssql_failover_group" "failover_group" {
   name                                      = azurecaf_name.failover_group.result
   server_id                                 = var.primary_server_id
-  server_name                               = var.primary_server_name
   databases                                 = local.databases
   readonly_endpoint_failover_policy_enabled = try(var.settings.readonly_endpoint_failover_policy_enabled, false)
   tags                                      = local.tags

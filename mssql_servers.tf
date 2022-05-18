@@ -65,6 +65,7 @@ module "mssql_failover_groups" {
   global_settings = local.global_settings
   client_config   = local.client_config
   settings        = each.value
+  base_tags       = try(local.global_settings.inherit_tags, false) ? try(local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].tags, {}) : {}
 
   primary_server_name                               = local.combined_objects_mssql_servers[each.value.primary_server.sql_server_key].name
   primary_server_id                                 = local.combined_objects_mssql_servers[each.value.primary_server.sql_server_key].id
