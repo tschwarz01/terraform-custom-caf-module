@@ -11,6 +11,6 @@ locals {
     "module" = basename(abspath(path.module))
   }
   tags                = merge(var.base_tags, local.module_tag, var.tags)
-  location            = can(var.settings.location) ? var.settings.location : var.resource_groups[try(var.settings.resource_group.key, var.settings.resource_group_key)].location
-  resource_group_name = can(var.settings.resource_group_name) || can(var.settings.resource_group.name) ? try(var.settings.resource_group_name, var.settings.resource_group.name) : var.resource_groups[try(var.settings.resource_group.key, var.settings.resource_group_key)].name
+  location            = can(var.settings.location) ? var.settings.location : var.remote_objects.resource_groups[try(var.settings.resource_group.key, var.settings.resource_group_key)].location
+  resource_group_name = can(var.settings.resource_group_name) || can(var.settings.resource_group.name) ? try(var.settings.resource_group_name, var.settings.resource_group.name) : var.remote_objects.resource_groups[try(var.settings.resource_group.key, var.settings.resource_group_key)].name
 }

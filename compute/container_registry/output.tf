@@ -23,3 +23,7 @@ output "login_server_url" {
 output "admin_username" {
   value = azurerm_container_registry.acr.admin_username
 }
+
+output "acr_private_endpoint" {
+  value = module.private_endpoint
+}

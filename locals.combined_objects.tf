@@ -12,7 +12,7 @@ locals {
   combined_objects_data_factory_integration_runtime_self_hosted          = module.data_factory_integration_runtime_self_hosted
   combined_objects_data_factory_integration_runtime_shared_self_hosted   = module.data_factory_integration_runtime_shared_self_hosted
   combined_objects_databricks_workspaces                                 = module.databricks_workspaces
-  combined_objects_diagnostic_storage_accounts                           = {}
+  combined_objects_diagnostic_storage_accounts                           = module.diagnostic_storage_accounts
   combined_objects_disk_encryption_sets                                  = module.disk_encryption_sets
   combined_objects_keyvaults                                             = module.keyvaults
   combined_objects_keyvault_keys                                         = module.keyvault_keys
@@ -31,7 +31,8 @@ locals {
   combined_objects_network_security_groups                               = module.network_security_groups
   combined_objects_public_ip_addresses                                   = module.public_ip_addresses
   combined_objects_public_ip_prefixes                                    = module.public_ip_prefixes
-  combined_objects_private_dns                                           = merge(module.private_dns, try(var.remote_objects.private_dns, {}))
+  combined_objects_private_dns                                           = merge(try(module.private_dns, {}), try(var.remote_objects.private_dns, {}), {})
+  combined_objects_remote_private_dns                                    = try(var.remote_objects.private_dns, {})
   combined_objects_purview_accounts                                      = module.purview_accounts
   combined_objects_recovery_vaults                                       = module.recovery_vaults
   combined_objects_resource_groups                                       = local.resource_groups
