@@ -6,6 +6,10 @@ variable "client_config" {
   description = "Client configuration object (see module README.md)."
 }
 
+variable "remote_objects" {
+  default = {}
+}
+
 variable "name" {
   type        = string
   description = "(Required) Specifies the name of the Container Registry. Changing this forces a new resource to be created."
@@ -32,10 +36,6 @@ variable "georeplications" {
   default     = {}
 }
 
-variable "vnets" {
-  default = {}
-}
-
 variable "network_rule_set" {
   description = " (Optional) A network_rule_set block as documented https://www.terraform.io/docs/providers/azurerm/r/container_registry.html"
   default     = {}
@@ -49,21 +49,24 @@ variable "diagnostics" {
   default = {}
 }
 
+/*
 variable "private_endpoints" {
   default = {}
 }
-
+variable "vnets" {
+  default = {}
+}
 variable "resource_groups" {
   default = {}
 }
+variable "private_dns" {
+  default = {}
+}
+*/
 
 variable "base_tags" {
   description = "Base tags for the resource to be inherited from the resource group."
   type        = map(any)
-}
-
-variable "private_dns" {
-  default = {}
 }
 
 variable "public_network_access_enabled" {

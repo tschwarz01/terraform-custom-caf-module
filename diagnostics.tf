@@ -3,7 +3,7 @@ locals {
   diagnostics = {
     diagnostic_log_analytics = try(var.diagnostics.diagnostic_log_analytics, {})
     #diagnostic_event_hub_namespaces = try(var.diagnostics.diagnostic_event_hub_namespaces, {})
-    #diagnostic_storage_accounts     = try(var.diagnostics.diagnostic_storage_accounts, {})
+    diagnostic_storage_accounts = try(var.diagnostics.diagnostic_storage_accounts, {})
   }
 
   # Remote amd locally created diagnostics  objects
@@ -33,6 +33,14 @@ module "diagnostic_storage_accounts" {
   location            = can(local.global_settings.regions[each.value.region]) ? local.global_settings.regions[each.value.region] : local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].location
   resource_group_name = can(each.value.resource_group.name) || can(each.value.resource_group_name) ? try(each.value.resource_group.name, each.value.resource_group_name) : local.combined_objects_resource_groups[try(each.value.resource_group_key, each.value.resource_group.key)].name
   base_tags           = try(local.global_settings.inherit_tags, false) ? try(local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].tags, {}) : {}
+
+  remote_objects = {
+    managed_identities = local.combined_objects_managed_identities
+    vnets              = local.combined_objects_networking
+    private_endpoints  = try(each.value.private_endpoints, {})
+    private_dns        = local.combined_objects_private_dns
+    resource_groups    = try(each.value.private_endpoints, {}) == {} ? null : local.combined_objects_resource_groups
+  }
 }
 
 

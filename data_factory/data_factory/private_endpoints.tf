@@ -2,14 +2,14 @@ module "private_endpoint" {
   source   = "../../networking/private_endpoint"
   for_each = var.remote_objects.private_endpoints
 
-  resource_id         = azurerm_data_factory.df.id
-  subnet_id           = can(each.value.subnet_id) ? each.value.subnet_id : var.remote_objects.vnets[each.value.vnet_key].subnets[each.value.subnet_key].id
-  name                = each.value.name
+  base_tags           = var.base_tags
   client_config       = var.client_config
   global_settings     = var.global_settings
+  location            = var.remote_objects.resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].location
   settings            = each.value
-  location            = var.location
-  resource_group_name = var.remote_objects.resource_groups[each.value.resource_group_key].name
-  base_tags           = var.base_tags
+  name                = each.value.name
+  resource_group_name = var.remote_objects.resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].name
   private_dns         = var.remote_objects.private_dns
+  resource_id         = azurerm_data_factory.df.id
+  subnet_id           = can(each.value.subnet_id) ? each.value.subnet_id : var.remote_objects.vnets[each.value.vnet_key].subnets[each.value.subnet_key].id
 }

@@ -31,7 +31,7 @@ locals {
   combined_objects_network_security_groups                               = module.network_security_groups
   combined_objects_public_ip_addresses                                   = module.public_ip_addresses
   combined_objects_public_ip_prefixes                                    = module.public_ip_prefixes
-  combined_objects_private_dns                                           = try(module.private_dns, {})
+  combined_objects_private_dns                                           = merge(try(module.private_dns, {}), try(var.remote_objects.private_dns, {}), {})
   combined_objects_remote_private_dns                                    = try(var.remote_objects.private_dns, {})
   combined_objects_purview_accounts                                      = module.purview_accounts
   combined_objects_recovery_vaults                                       = module.recovery_vaults

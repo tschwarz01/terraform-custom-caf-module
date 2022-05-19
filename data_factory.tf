@@ -12,9 +12,9 @@ module "data_factory" {
 
   remote_objects = {
     managed_identities = local.combined_objects_managed_identities
-    private_dns        = local.combined_objects_private_dns
     vnets              = local.combined_objects_networking
     private_endpoints  = try(each.value.private_endpoints, {})
+    private_dns        = local.combined_objects_private_dns
     resource_groups    = try(each.value.private_endpoints, {}) == {} ? null : local.combined_objects_resource_groups
   }
 

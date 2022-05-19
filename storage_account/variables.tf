@@ -25,4 +25,6 @@ variable "recovery_vaults" {
 }
 
 
-variable "remote_objects" {}
+variable "remote_objects" {
+  default = {}
+}

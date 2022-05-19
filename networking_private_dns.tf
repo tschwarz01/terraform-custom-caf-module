@@ -2,7 +2,7 @@
 
 module "private_dns" {
   source   = "./networking/private-dns"
-  for_each = local.networking.private_dns
+  for_each = try(local.networking.private_dns, {})
 
   global_settings     = local.global_settings
   client_config       = local.client_config
@@ -46,7 +46,7 @@ module "private_dns_vnet_links" {
   tags            = try(each.value.tags, null)
   global_settings = local.global_settings
   #is_remote           = true
-  private_dns_zone_id = try(each.value.zone_id, local.combined_objects_private_dns[each.value.zone_key].id)
+  private_dns_zone_id = try(each.value.id, each.value.zone_id, local.combined_objects_private_dns[each.value.zone_key].id)
   virtual_network_id  = try(each.value.vnet_id, local.combined_objects_networking[each.value.vnet_key].id)
   name                = each.value.name
 }
