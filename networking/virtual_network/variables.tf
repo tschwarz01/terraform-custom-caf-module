@@ -59,8 +59,3 @@ variable "network_security_groups" {
 variable "remote_dns" {
   default = {}
 }
-
-variable "user_type" {
-  description = "The rover set this value to user or serviceprincipal. It is used to handle Azure AD API consents."
-  default     = {}
-}

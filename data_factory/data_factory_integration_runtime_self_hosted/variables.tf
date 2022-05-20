@@ -21,3 +21,7 @@ variable "data_factory_id" {
   description = "The id of the Data Factory which will own the self-hosted integration runtime."
 }
 
+variable "host_runtime_resource_id" {
+  type    = string
+  default = null
+}

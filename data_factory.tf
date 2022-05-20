@@ -17,8 +17,6 @@ module "data_factory" {
     private_dns        = local.combined_objects_private_dns
     resource_groups    = try(each.value.private_endpoints, {}) == {} ? null : local.combined_objects_resource_groups
   }
-
-
 }
 
 output "data_factory" {
@@ -29,14 +27,16 @@ module "data_factory_integration_runtime_self_hosted" {
   source   = "./data_factory/data_factory_integration_runtime_self_hosted"
   for_each = local.data_factory.data_factory_integration_runtime_self_hosted
 
+
   global_settings = local.global_settings
   client_config   = local.client_config
   settings        = each.value
-
   data_factory_id = can(each.value.data_factory.id) ? each.value.data_factory.id : local.combined_objects_data_factory[each.value.data_factory.key].id
+  #host_runtime_resource_id = try(can(each.value.host_data_factory.runtime_resource_id) ? each.value.host_data_factory.runtime_resource_id : local.combined_objects_data_factory_integration_runtime_self_hosted[each.value.host_data_factory.runtime_key].id, null)
 
   remote_objects = {
-    data_factory   = local.combined_objects_data_factory
+    data_factory = local.combined_objects_data_factory
+    #data_factory_integration_runtime_self_hosted = try(local.combined_objects_data_factory_integration_runtime_self_hosted, null)
     resource_group = local.combined_objects_resource_groups
   }
 }
@@ -44,6 +44,43 @@ output "data_factory_integration_runtime_self_hosted" {
   value = module.data_factory_integration_runtime_self_hosted
 }
 
+resource "azurerm_role_assignment" "target" {
+  for_each = local.data_factory.data_factory_integration_runtime_shared_self_hosted
+
+  scope                = try(can(each.value.host_data_factory.resource_id) ? each.value.host_data_factory.resource_id : local.combined_objects_data_factory[each.value.host_data_factory.key].id, null)
+  role_definition_name = "Contributor"
+  principal_id         = can(each.value.data_factory.principal_id) ? each.value.data_factory.principal_id : try(module.data_factory[each.value.data_factory.key].identity[0].principal_id, null)
+}
+
+resource "time_sleep" "shirdelay" {
+  depends_on      = [azurerm_role_assignment.target]
+  create_duration = "75s"
+}
+
+module "data_factory_integration_runtime_shared_self_hosted" {
+  depends_on = [
+    time_sleep.shirdelay, module.data_factory_integration_runtime_self_hosted
+  ]
+  source   = "./data_factory/data_factory_integration_runtime_shared_self_hosted"
+  for_each = local.data_factory.data_factory_integration_runtime_shared_self_hosted
+
+  global_settings          = local.global_settings
+  client_config            = local.client_config
+  settings                 = each.value
+  data_factory_id          = can(each.value.data_factory.id) ? each.value.data_factory.id : local.combined_objects_data_factory[each.value.data_factory.key].id
+  host_runtime_resource_id = try(can(each.value.host_data_factory.runtime_resource_id) ? each.value.host_data_factory.runtime_resource_id : module.data_factory_integration_runtime_self_hosted[each.value.host_data_factory.runtime_key].id, null)
+
+  remote_objects = {
+    data_factory = local.combined_objects_data_factory
+    #data_factory_integration_runtime_self_hosted = try(local.combined_objects_data_factory_integration_runtime_self_hosted, null)
+    resource_group = local.combined_objects_resource_groups
+  }
+}
+output "data_factory_integration_runtime_shared_self_hosted" {
+  value = module.data_factory_integration_runtime_shared_self_hosted
+}
+
+/*
 module "data_factory_integration_runtime_shared_self_hosted" {
   source   = "./data_factory/data_factory_integration_runtime_shared_self_hosted"
   for_each = local.data_factory.data_factory_integration_runtime_shared_self_hosted
@@ -53,7 +90,7 @@ module "data_factory_integration_runtime_shared_self_hosted" {
   settings        = each.value
 
   data_factory_id    = can(each.value.data_factory.id) ? each.value.data_factory.id : local.combined_objects_data_factory[each.value.data_factory.key].id
-  data_factory_mi_id = can(each.value.data_factory.id) ? each.value.data_factory.id : local.combined_objects_data_factory[each.value.data_factory.key].identity[0].principal_id
+  data_factory_mi_id = can(each.value.data_factory.id) ? each.value.data_factory.id : try(local.combined_objects_data_factory[each.value.data_factory.key].identity[0].principal_id, null)
 
   shared_runtime_resource_id     = try(can(each.value.existing_data_factory.runtime_resource_id) ? each.value.existing_data_factory.runtime_resource_id : local.combined_objects_data_factory_integration_runtime_self_hosted[each.value.existing_data_factory.runtime_key].id, null)
   shared_runtime_data_factory_id = try(can(each.value.existing_data_factory.resource_id) ? each.value.existing_data_factory.resource_id : local.combined_objects_data_factory[each.value.existing_data_factory.key].id, null)
@@ -67,7 +104,6 @@ output "data_factory_integration_runtime_shared_self_hosted" {
   value = module.data_factory_integration_runtime_shared_self_hosted
 }
 
-/*
 module "data_factory_integration_runtime_azure_ssis" {
   source   = "./data_factory/data_factory_integration_runtime_azure_ssis"
   for_each = local.data_factory.data_factory_integration_runtime_azure_ssis

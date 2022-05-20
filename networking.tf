@@ -15,9 +15,9 @@ output "public_ip_prefixes" {
   value = module.public_ip_prefixes
 }
 
-#output "network_watchers" {
-#  value = module.network_watchers
-#}
+output "network_watchers" {
+  value = module.network_watchers
+}
 
 
 #
@@ -27,9 +27,9 @@ output "public_ip_prefixes" {
 #
 
 module "networking" {
-  #depends_on = [module.network_watchers]
-  source   = "./networking/virtual_network"
-  for_each = local.networking.vnets
+  depends_on = [module.network_watchers]
+  source     = "./networking/virtual_network"
+  for_each   = local.networking.vnets
 
   application_security_groups = local.combined_objects_application_security_groups
   client_config               = try(local.client_config, {})
@@ -38,10 +38,10 @@ module "networking" {
   global_settings                   = local.global_settings
   network_security_groups           = module.network_security_groups
   network_security_group_definition = local.networking.network_security_group_definition
-  #network_watchers                  = local.combined_objects_network_watchers
-  route_tables = module.route_tables
-  settings     = each.value
-  tags         = try(each.value.tags, null)
+  network_watchers                  = local.combined_objects_network_watchers
+  route_tables                      = module.route_tables
+  settings                          = each.value
+  tags                              = try(each.value.tags, null)
 
   resource_group_name = local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].name
   location            = lookup(each.value, "region", null) == null ? local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].location : local.global_settings.regions[each.value.region]
@@ -68,7 +68,6 @@ module "virtual_subnets" {
 
   resource_group_name  = can(each.value.vnet.key) ? local.combined_objects_networking[each.value.vnet.key].resource_group_name : split("/", each.value.vnet.id)[4]
   virtual_network_name = can(each.value.vnet.key) ? local.combined_objects_networking[each.value.vnet.key].name : split("/", each.value.vnet.id)[8]
-
 }
 
 resource "azurerm_subnet_route_table_association" "rt" {
@@ -295,5 +294,15 @@ module "routes" {
 
 }
 
+module "network_watchers" {
+  source   = "./networking/network_watcher"
+  for_each = local.networking.network_watchers
 
+  location            = can(local.global_settings.regions[each.value.region]) ? local.global_settings.regions[each.value.region] : local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].location
+  resource_group_name = can(each.value.resource_group.name) || can(each.value.resource_group_name) ? try(each.value.resource_group.name, each.value.resource_group_name) : local.combined_objects_resource_groups[try(each.value.resource_group_key, each.value.resource_group.key)].name
+  base_tags           = try(local.global_settings.inherit_tags, false) ? try(local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].tags, {}) : {}
+  settings            = each.value
+  tags                = try(each.value.tags, null)
+  global_settings     = local.global_settings
+}
 

@@ -1,4 +1,4 @@
-/*
+
 module "diagnostics" {
   source = "../../../diagnostics"
   for_each = {
@@ -11,4 +11,3 @@ module "diagnostics" {
   diagnostics       = var.diagnostics
   profiles          = try(var.network_security_group_definition[each.value.nsg_key].diagnostic_profiles, var.network_security_group_definition["empty_nsg"].diagnostic_profiles)
 }
-*/

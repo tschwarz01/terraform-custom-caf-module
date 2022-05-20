@@ -22,14 +22,14 @@ resource "azurerm_virtual_network" "vnet" {
     try(local.dns_servers_process, null)
   )
 
-  /*  dynamic "ddos_protection_plan" {
+  dynamic "ddos_protection_plan" {
     for_each = var.ddos_id != "" || can(var.global_settings["ddos_protection_plan_id"]) ? [1] : []
 
     content {
       id     = var.ddos_id != "" ? var.ddos_id : var.global_settings["ddos_protection_plan_id"]
       enable = true
     }
-  }  */
+  }
 }
 
 module "special_subnets" {
@@ -74,9 +74,9 @@ module "nsg" {
   network_security_group_definition = var.network_security_group_definition
   resource_group                    = var.resource_group_name
   subnets                           = try(var.settings.subnets, {})
-  #  network_watchers                  = var.network_watchers
-  tags                 = local.tags
-  virtual_network_name = azurerm_virtual_network.vnet.name
+  network_watchers                  = var.network_watchers
+  tags                              = local.tags
+  virtual_network_name              = azurerm_virtual_network.vnet.name
 }
 
 resource "azurerm_subnet_route_table_association" "rt" {
@@ -114,10 +114,10 @@ locals {
   dns_servers_process = [
     for obj in try(var.settings.vnet.dns_servers_keys, {}) : #o.ip
     coalesce(
-      try(var.remote_dns[obj.resource_type][obj.lz_key][obj.key].virtual_hub[obj.interface_index].private_ip_address, null),
-      try(var.remote_dns[obj.resource_type][obj.lz_key][obj.key].virtual_hub.0.private_ip_address, null),
-      try(var.remote_dns[obj.resource_type][obj.lz_key][obj.key].ip_configuration[obj.interface_index].private_ip_address, null),
-      try(var.remote_dns[obj.resource_type][obj.lz_key][obj.key].ip_configuration.0.private_ip_address, null),
+      try(var.remote_dns[obj.resource_type][obj.key].virtual_hub[obj.interface_index].private_ip_address, null),
+      try(var.remote_dns[obj.resource_type][obj.key].virtual_hub.0.private_ip_address, null),
+      try(var.remote_dns[obj.resource_type][obj.key].ip_configuration[obj.interface_index].private_ip_address, null),
+      try(var.remote_dns[obj.resource_type][obj.key].ip_configuration.0.private_ip_address, null),
       null
     )
     # for ip_key, resouce_ip in var.settings.vnet.dns_servers_keys: [

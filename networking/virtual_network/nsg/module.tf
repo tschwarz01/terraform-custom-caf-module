@@ -54,7 +54,7 @@ resource "azurerm_network_security_group" "nsg_obj" {
           flatten(
             [
               for key in try(security_rule.value.source_application_security_groups.keys, []) : [
-                var.application_security_groups[try(security_rule.value.lz_key, var.client_config.landingzone_key)][key].id
+                var.application_security_groups[key].id
               ]
             ]
           ),
@@ -83,7 +83,7 @@ resource "azurerm_network_security_group" "nsg_obj" {
           flatten(
             [
               for key in try(security_rule.value.destination_application_security_groups.keys, []) : [
-                var.application_security_groups[try(security_rule.value.lz_key, var.client_config.landingzone_key)][key].id
+                var.application_security_groups[key].id
               ]
             ]
           ),

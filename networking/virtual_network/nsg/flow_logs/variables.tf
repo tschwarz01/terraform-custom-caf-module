@@ -1,4 +1,3 @@
-
 variable "resource_id" {
   description = "(Required) Fully qualified Azure resource identifier for which you enable diagnostics."
 }
@@ -28,9 +27,5 @@ variable "network_watchers" {
 }
 
 variable "name" {
-  default = "flow-log"
-}
 
-variable "tags" {
-  default = {}
 }
