@@ -13,7 +13,6 @@ variable "location" {
   description = "(Required) Specifies the supported Azure location where to create the resource. Changing this forces a new resource to be created."
   type        = string
 }
-
 variable "resource_groups" {
   default = {}
 }
@@ -23,8 +22,20 @@ variable "base_tags" {
 variable "recovery_vaults" {
   default = {}
 }
-
-
 variable "remote_objects" {
+  default = {
+    private_endpoints = {}
+  }
+}
+variable "vnets" {
+  default = {}
+}
+variable "managed_identities" {
+  default = {}
+}
+variable "private_endpoints" {
+  default = {}
+}
+variable "private_dns" {
   default = {}
 }

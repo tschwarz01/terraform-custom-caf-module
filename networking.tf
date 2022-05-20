@@ -31,9 +31,9 @@ module "networking" {
   source     = "./networking/virtual_network"
   for_each   = local.networking.vnets
 
-  application_security_groups = local.combined_objects_application_security_groups
-  client_config               = try(local.client_config, {})
-  #ddos_id                           = try(local.combined_objects_ddos_services[try(each.value.ddos_services_key, each.value.ddos_services_key)].id, "")
+  application_security_groups       = local.combined_objects_application_security_groups
+  client_config                     = try(local.client_config, {})
+  ddos_id                           = try(local.combined_objects_ddos_services[try(each.value.ddos_services_key, each.value.ddos_services_key)].id, "")
   diagnostics                       = local.combined_diagnostics
   global_settings                   = local.global_settings
   network_security_groups           = module.network_security_groups
@@ -294,6 +294,43 @@ module "routes" {
 
 }
 
+#
+#
+# Azure DDoS
+#
+#
+
+# naming convention
+resource "azurecaf_name" "ddos_protection_plan" {
+  for_each = local.networking.ddos_services
+
+  name          = try(each.value.name, null)
+  resource_type = "azurerm_network_ddos_protection_plan"
+  prefixes      = local.global_settings.prefixes
+  random_length = local.global_settings.random_length
+  clean_input   = true
+  passthrough   = local.global_settings.passthrough
+  use_slug      = local.global_settings.use_slug
+}
+
+resource "azurerm_network_ddos_protection_plan" "ddos_protection_plan" {
+  for_each = local.networking.ddos_services
+
+  name                = azurecaf_name.ddos_protection_plan[each.key].result
+  location            = can(local.global_settings.regions[each.value.region]) ? local.global_settings.regions[each.value.region] : local.combined_objects_resource_groups[try(each.value.resource_group.key, each.value.resource_group_key)].location
+  resource_group_name = can(each.value.resource_group.name) || can(each.value.resource_group_name) ? try(each.value.resource_group.name, each.value.resource_group_name) : local.combined_objects_resource_groups[try(each.value.resource_group_key, each.value.resource_group.key)].name
+  tags                = try(local.global_settings.inherit_tags, false) ? merge(try(local.combined_objects_resource_groups[each.value.resource_group_key].tags, {}), try(each.value.tags, {})) : try(each.value.tags, {})
+}
+
+output "ddos_services" {
+  value = azurerm_network_ddos_protection_plan.ddos_protection_plan
+}
+
+#
+#
+# Network Watchers
+#
+#
 module "network_watchers" {
   source   = "./networking/network_watcher"
   for_each = local.networking.network_watchers

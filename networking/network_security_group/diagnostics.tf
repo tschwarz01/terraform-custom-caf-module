@@ -1,4 +1,4 @@
-/*
+
 module "diagnostics" {
   source = "../../diagnostics"
   count  = try(var.settings.diagnostic_profiles, null) == null ? 0 : 1
@@ -8,4 +8,3 @@ module "diagnostics" {
   diagnostics       = var.diagnostics
   profiles          = var.settings.diagnostic_profiles
 }
-*/

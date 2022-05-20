@@ -22,6 +22,7 @@ locals {
   */
 
   combined_objects_databricks_workspaces             = module.databricks_workspaces
+  combined_objects_ddos_services                     = azurerm_network_ddos_protection_plan.ddos_protection_plan
   combined_objects_diagnostic_storage_accounts       = module.diagnostic_storage_accounts
   combined_objects_disk_encryption_sets              = module.disk_encryption_sets
   combined_objects_keyvaults                         = module.keyvaults
