@@ -1,14 +1,15 @@
+
 module "resource_groups" {
   source = "./resource_group"
   for_each = {
     for key, value in try(local.deploy_resource_groups, {}) : key => value
+    if try(value.reuse, false) == false
   }
 
   resource_group_name = each.value.name
   settings            = each.value
   global_settings     = local.global_settings
-  tags                = merge(lookup(each.value, "tags", {}), var.common_module_params.tags)
-  # common_module_params = var.common_module_params
+  tags                = merge(lookup(each.value, "tags", {}), var.tags)
 }
 
 module "resource_group_reused" {

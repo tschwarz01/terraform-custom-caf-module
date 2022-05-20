@@ -15,6 +15,12 @@ variable "global_settings" {
   }
 }
 
+variable "tags" {
+  description = "Tags to be used for this resource deployment."
+  type        = map(any)
+  default     = null
+}
+
 variable "common_module_params" {
   default = {}
 }
