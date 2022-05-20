@@ -11,7 +11,7 @@ locals {
     diagnostics_definition   = try(var.diagnostics.diagnostics_definition, {})
     diagnostics_destinations = try(var.diagnostics.diagnostics_destinations, {})
     log_analytics            = merge(try(var.diagnostics.log_analytics, {}), module.diagnostic_log_analytics)
-    #storage_accounts         = merge(try(var.diagnostics.storage_accounts, {}), module.diagnostic_storage_accounts)
+    storage_accounts         = merge(try(var.diagnostics.storage_accounts, {}), module.diagnostic_storage_accounts)
     #event_hub_namespaces     = merge(try(var.diagnostics.event_hub_namespaces, {}), module.diagnostic_event_hub_namespaces)
   }
 }
