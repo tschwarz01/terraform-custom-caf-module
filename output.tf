@@ -1,7 +1,6 @@
-output "copdns" {
-  value = local.combined_objects_private_dns
-}
-
-output "pva" {
-  value = local.purview
+output "resources" {
+  value = {
+    resource_groups = merge(try(local.combined_objects_resource_groups, {}), {})
+    log_analytics   = merge(try(local.combined_objects_log_analytics, {}), {})
+  }
 }
